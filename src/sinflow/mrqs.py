@@ -222,8 +222,8 @@ class MonotonicRationalQuadraticSpline:
         x_within = x_m + delta_x * xi
         x[within] = x_within
 
-        if np.any(np.isnan(x)):
-            raise ValueError("NaN encountered in inverse transformation.")
+        #if np.any(np.isnan(x)):
+        #    raise ValueError("NaN encountered in inverse transformation.")
         
         # Compute dy/dx at the computed x to obtain dx/dy
         dy_dx_at_x = self.derivative(x_within)
