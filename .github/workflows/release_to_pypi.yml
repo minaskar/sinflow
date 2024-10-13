@@ -58,7 +58,7 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1.1.0  # Updated to a specific version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -66,10 +66,14 @@ jobs:
           release_name: ${{ env.VERSION }}
           draft: false
           prerelease: false
-
+  
       - name: Get Asset name
         run: |
-          PKG=$(ls dist/ | grep -E '\.tar\.gz$|\.whl$')
+          PKG=$(find dist/ -type f \( -name "*.tar.gz" -o -name "*.whl" \) | head -n 1 | xargs basename)
+          if [ -z "$PKG" ]; then
+            echo "No distribution files found in dist/"
+            exit 1
+          fi
           echo "ASSET_NAME=$PKG" >> $GITHUB_ENV
   
       - name: Upload Release Asset (sdist) to GitHub
