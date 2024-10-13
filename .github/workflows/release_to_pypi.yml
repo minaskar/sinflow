@@ -70,14 +70,14 @@ jobs:
       - name: Get Asset name
         run: |
           PKG=$(ls dist/ | grep -E '\.tar\.gz$|\.whl$')
-          echo "name=$PKG" >> $GITHUB_ENV
-
+          echo "ASSET_NAME=$PKG" >> $GITHUB_ENV
+  
       - name: Upload Release Asset (sdist) to GitHub
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/${{ env.name }}
-          asset_name: ${{ env.name }}
+          asset_path: dist/${{ env.ASSET_NAME }}
+          asset_name: ${{ env.ASSET_NAME }}
           asset_content_type: application/gzip
