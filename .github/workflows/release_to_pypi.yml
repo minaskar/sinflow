@@ -48,13 +48,19 @@ jobs:
 
       - name: Get the version
         id: get_version
-        run: echo "VERSION=$(grep -oP '(?<=version\s*=\s*")[^"]+' sinflow/_version.py)" >> $GITHUB_ENV
+        run: |
+          VERSION=$(grep '^version\s*=' sinflow/_version.py | cut -d'"' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Debug - Print Extracted Version
+        run: |
+          echo "Extracted Version: $VERSION"
 
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This token is provided by Actions, no need to create your own
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.VERSION }}
           release_name: ${{ env.VERSION }}
