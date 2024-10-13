@@ -24,6 +24,5 @@ python:
    install:
    - method: pip
      path: .  # Install the current project
-     editable: true  # Install in editable mode
    - requirements: docs/requirements.txt
    - requirements: requirements.txt
