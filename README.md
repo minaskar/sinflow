@@ -4,10 +4,6 @@
 [![Documentation Status](https://readthedocs.org/projects/sinflow/badge/?version=latest)](https://sinflow.readthedocs.io/en/latest/?badge=latest)
 
 
-# Getting started
-
-## Brief introduction
-
 ``sinflow`` is a Python implementation of the sliced iterative normalizing flow (SINF) algorithm
 for density estimation and sampling. The package has minimal dependencies, requiring only
 ``numpy`` and ``scipy``. The code is designed to be easy to use and flexible, with a focus on
@@ -64,7 +60,7 @@ x_reconstructed, log_det_inverse = flow.inverse(z)
 ```
 
 
-# Attribution & Citation
+## Attribution & Citation
 
 Please cite the following paper if you found this code useful in your research:
 
@@ -77,7 +73,7 @@ Please cite the following paper if you found this code useful in your research:
 }
 ```
 
-# Licence
+## Licence
 
 Copyright 2024-Now Minas Karamanis and contributors.
 
