@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'sinflow/_version.py'  # Only run workflow on pushes where _version.py was changed
+      - 'src/sinflow/_version.py'  # Only run workflow on pushes where _version.py was changed
   workflow_dispatch:  # Allows you to run this workflow manually from the Actions tab
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
       - name: Get the version
         id: get_version
         run: |
-          VERSION=$(grep '^version\s*=' sinflow/_version.py | cut -d'"' -f2)
+          VERSION=$(grep '^version\s*=' src/sinflow/_version.py | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Debug - Print Extracted Version
