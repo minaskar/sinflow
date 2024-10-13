@@ -19,7 +19,7 @@ class TestFlow(unittest.TestCase):
         self.assertEqual(self.flow.p, 2)
         self.assertEqual(self.flow.max_iter, 1000)
         self.assertEqual(self.flow.alpha_init, 1.0)
-        self.assertEqual(self.flow.beta, 0.5)
+        self.assertEqual(self.flow.beta, 0.2)
         self.assertEqual(self.flow.tol, 1e-6)
         self.assertEqual(self.flow.c, 1e-4)
         self.assertFalse(self.flow.verbose)

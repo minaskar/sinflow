@@ -71,7 +71,7 @@ class Flow:
                 n_knots=1000, 
                 validation_fraction=0.2, 
                 early_stopping=True,
-                n_iter_no_change=10,
+                n_iter_no_change=20,
                 reg_cov=1e-6,
                 whiten=True,
                 warm_start=False,
