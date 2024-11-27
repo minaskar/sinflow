@@ -5,13 +5,13 @@ Make Strictly Monotonic
 -----------------------
 .. autofunction:: sinflow.tools.make_strictly_monotonic
 
-Sliced Wasserstein Distance
----------------------------
-.. autofunction:: sinflow.tools.sliced_wasserstein_distance
+Maximum Sliced Wasserstein Distance
+-----------------------------------
+.. autofunction:: sinflow.tools.max_sliced_wasserstein_distance
 
-Gradient Sliced Wasserstein Distance
-------------------------------------
-.. autofunction:: sinflow.tools.gradient_sliced_wasserstein_distance
+Gradient Maximum Sliced Wasserstein Distance
+--------------------------------------------
+.. autofunction:: sinflow.tools.gradient_max_sliced_wasserstein_distance
 
 Gradient Ascent Unit Vector
 ---------------------------

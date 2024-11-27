@@ -81,8 +81,8 @@ class AffineTransform:
         log_det : numpy.ndarray
             Logarithm of the determinant of the Jacobian of the transformation.
         """
-        #x = y @ self.chol.T + self.mean
-        x = np.einsum('ij,jk->ik', y, self.chol.T) + self.mean
+        x = y @ self.chol.T + self.mean
+        #x = np.einsum('ij,jk->ik', y, self.chol.T) + self.mean
         log_det = self.log_det * np.ones(y.shape[0])
 
         return x, log_det
@@ -248,8 +248,8 @@ class ProjectedSplineTransform:
 
         self.dim = x.shape[1]
         # Project data onto the direction
-        #projections = x @ self.direction  # Shape: (N,)
-        projections = np.einsum('ij,j->i', x, self.direction)
+        projections = x @ self.direction  # Shape: (N,)
+        #projections = np.einsum('ij,j->i', x, self.direction)
 
         # Fit KDE on projections
         kde = KernelDensityEstimator(projections, bandwidth=self.bandwidth)
@@ -303,8 +303,8 @@ class ProjectedSplineTransform:
             raise ValueError(f"Input data must have shape (N, {self.dim}).")
 
         # Project data onto the direction
-        #projections = x @ self.direction  # Shape: (N,)
-        projections = np.einsum('ij,j->i', x, self.direction)
+        projections = x @ self.direction  # Shape: (N,)
+        #projections = np.einsum('ij,j->i', x, self.direction)
 
         # Apply the spline forward transformation
         transformed_projections, dy_dx = self.spline.forward(projections)
@@ -341,8 +341,8 @@ class ProjectedSplineTransform:
             raise ValueError(f"Input data must have shape (N, {self.dim}).")
 
         # Project data onto the direction
-        #projections = y @ self.direction  # Shape: (N,)
-        projections = np.einsum('ij,j->i', y, self.direction)
+        projections = y @ self.direction  # Shape: (N,)
+        #projections = np.einsum('ij,j->i', y, self.direction)
 
         # Apply the spline inverse transformation
         inverse_projections, dx_dy = self.spline.inverse(projections)

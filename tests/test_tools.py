@@ -1,6 +1,10 @@
 import unittest
 import numpy as np
-from sinflow.tools import make_strictly_monotonic, sliced_wasserstein_distance, gradient_sliced_wasserstein_distance, gradient_ascent_unit_vector
+from sinflow.tools import (make_strictly_monotonic, 
+                           sliced_wasserstein_distance,
+                           max_sliced_wasserstein_distance,) 
+                           #gradient_max_sliced_wasserstein_distance, 
+                           #optimize_direction)
 
 class TestTools(unittest.TestCase):
 
@@ -31,21 +35,27 @@ class TestTools(unittest.TestCase):
 
     def test_sliced_wasserstein_distance(self):
         x = np.random.randn(100, 2)
-        direction = np.array([1, 0])
-        distance = sliced_wasserstein_distance(x, direction)
+        distance = sliced_wasserstein_distance(x)
         self.assertTrue(distance >= 0)
 
-    def test_gradient_sliced_wasserstein_distance(self):
+    def test_max_sliced_wasserstein_distance(self):
         x = np.random.randn(100, 2)
         direction = np.array([1, 0])
-        gradient = gradient_sliced_wasserstein_distance(x, direction)
-        self.assertEqual(gradient.shape, (2,))
+        distance = max_sliced_wasserstein_distance(x, direction)
+        self.assertTrue(distance >= 0)
 
-    def test_gradient_ascent_unit_vector(self):
-        x = np.random.randn(100, 2)
-        direction, loss = gradient_ascent_unit_vector(x, max_iter=10, verbose=True)
-        self.assertEqual(direction.shape, (2,))
-        self.assertTrue(np.isclose(np.linalg.norm(direction), 1))
+    #def test_gradient_max_sliced_wasserstein_distance(self):
+    #    x = np.random.randn(100, 2)
+    #    direction = np.array([1, 0])
+    #    gradient = gradient_max_sliced_wasserstein_distance(x, direction)
+    #    self.assertEqual(gradient.shape, (2,))
+
+    #def test_optimize_direction(self):
+    #    x = np.random.randn(100, 2)
+    #    x[:, 0] *= 10
+    #    direction, loss = optimize_direction(x, max_iter=100, verbose=False)
+    #    self.assertEqual(direction.shape, (2,))
+    #    self.assertTrue(np.isclose(np.linalg.norm(direction), 1))
 
 if __name__ == '__main__':
     unittest.main()

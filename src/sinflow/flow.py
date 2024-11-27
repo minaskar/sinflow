@@ -2,8 +2,9 @@ import numpy as np
 from scipy.stats import norm
 
 from .transforms import ProjectedSplineTransform, AffineTransform, SplineTransform
-from .tools import sliced_wasserstein_distance
-from .tools import gradient_ascent_unit_vector
+from .tools import max_sliced_wasserstein_distance
+from .tools import maximize_max_sliced_wasserstein_distance_SGD
+from .tools import maximize_max_sliced_wasserstein_distance_SGD_backtracking
 
 class Flow:
     r"""
@@ -32,14 +33,10 @@ class Flow:
         Power for the Wasserstein distance calculation.
     max_iter : int
         Maximum number of iterations for the gradient ascent algorithm.
-    alpha_init : float
-        Initial step size for the backtracking line search.
-    beta : float
-        Step size reduction factor for the backtracking line search.
     tol : float
         Tolerance for the gradient norm to declare convergence.
-    c : float
-        Armijo condition constant.
+    n_directions : int
+        Number of directions to use in the sliced Wasserstein distance calculation.
     verbose : bool
         If True, print progress information.
     initialized : bool
@@ -67,20 +64,21 @@ class Flow:
     """
 
     def __init__(self, 
-                n_transforms=100, 
+                n_transforms=500, 
+                n_directions=None,
                 n_knots=1000, 
                 validation_fraction=0.2, 
                 early_stopping=True,
-                n_iter_no_change=20,
+                n_iter_no_change=10,
                 reg_cov=1e-6,
                 whiten=True,
                 warm_start=False,
                 p=2,
-                max_iter=1000,
-                alpha_init=1.0,
+                learning_rate=1000.0,
                 beta=0.2,
+                max_iter=1000,
                 tol=1e-6,
-                c=1e-4,
+                random_state=None,
                 verbose=False,
                 ):
         r"""
@@ -91,6 +89,9 @@ class Flow:
         -----------
         n_transforms : int
             Number of transformations to apply. Default is 100.
+        n_directions : int
+            Number of directions to use in the sliced Wasserstein distance calculation. Default is None.
+            If None, use half the dimension of the data.
         n_knots : int
             Number of knots to use in the spline transformations. Default is 1000.
         validation_fraction: float
@@ -109,19 +110,20 @@ class Flow:
             Power for the Wasserstein distance calculation. Default is 2.
         max_iter : int
             Maximum number of iterations for the gradient ascent algorithm. Default is 1000.
-        alpha_init : float
-            Initial step size for the backtracking line search. Default is 1.0.
+        learning_rate : float
+            Learning rate for the gradient ascent algorithm. Default is 1000.0.
         beta : float
-            Step size reduction factor for the backtracking line search. Default is 0.2.
+            Learning rate decay factor. Default is 0.2.
         tol : float
             Tolerance for the gradient norm to declare convergence. Default is 1e-6.
-        c : float
-            Armijo condition constant. Default is 1e-4.
+        random_state : int or None
+            Seed for reproducibility. Default is None.
         verbose : bool
             If True, print progress information. Default is False.
         """
         
         self.n_transforms = n_transforms
+        self.n_directions = n_directions
         self.n_knots = n_knots
         self.validation_fraction = validation_fraction
         self.early_stopping = early_stopping
@@ -130,11 +132,11 @@ class Flow:
         self.whiten = whiten
         self.warm_start = warm_start
         self.p = p
-        self.max_iter = max_iter
-        self.alpha_init = alpha_init
+        self.learning_rate = learning_rate
         self.beta = beta
+        self.max_iter = max_iter
         self.tol = tol
-        self.c = c
+        self.random_state = random_state
         self.verbose = verbose
 
         self.initialized = False
@@ -196,33 +198,58 @@ class Flow:
             # Set initialized flag to True
             self.initialized = True
 
+        if self.n_directions is None:
+            self.n_directions = D // 2
+        elif self.n_directions > D:
+            self.n_directions = D
+        
+        K = self.n_directions
+
         for i in range(self.n_transforms):
+
+            #import time
+
+            #t0 = time.time()
 
             # Apply the current transformation to the data
             y_train = self.transforms[-1].forward(y_train)[0]
             y_val = self.transforms[-1].forward(y_val)[0]
 
-            # Compute the maximum sliced Wasserstein direction
-            direction, loss = gradient_ascent_unit_vector(y_train,
-                                                          p=self.p,
-                                                          initial_direction=None,
-                                                          max_iter=self.max_iter,
-                                                          tol=self.tol,
-                                                          alpha_init=self.alpha_init,
-                                                          beta=self.beta,
-                                                          c=self.c,
-                                                          verbose=self.verbose,)
+            #t1 = time.time()
 
-            # Compute the maximum sliced Wasserstein distance
-            max_swd_train = sliced_wasserstein_distance(y_train, direction)
-            max_swd_val = sliced_wasserstein_distance(y_val, direction)
+            if i % K == 0:
+                A = maximize_max_sliced_wasserstein_distance_SGD(y_train, 
+                                                                 K=K, 
+                                                                 learning_rate=self.learning_rate,
+                                                                 beta=self.beta,
+                                                                 max_iter=self.max_iter, 
+                                                                 tol=self.tol,
+                                                                 verbose=False)
+                #A = maximize_max_sliced_wasserstein_distance_SGD_backtracking(y_train, 
+                #                                                 K=K, 
+                #                                                 learning_rate=self.learning_rate, 
+                #                                                 max_iter=self.max_iter, 
+                #                                                 alpha=0.5,
+                #                                                 beta=0.5,
+                #                                                 tol=self.tol,
+                #                                                 verbose=True)
 
-            if self.verbose and (i + 1) % 10 == 0: 
-                print(f"Iteration {i+1} | Training MAX-SWD {max_swd_train} | Validation MAX-SWD {max_swd_val}")
+            direction = A[:, i % K]
 
-            # Append the maximum sliced Wasserstein distances to the history lists
-            self.train_history.append(max_swd_train)
-            self.val_history.append(max_swd_val)
+            #t2 = time.time()
+
+            # Compute the sliced Wasserstein distance            
+            swd_train = max_sliced_wasserstein_distance(y_train, direction)
+            swd_val = max_sliced_wasserstein_distance(y_val, direction)
+
+            if self.verbose and (i + 1) % 1 == 0: 
+                print(f"Iter {i+1} | Train SWD {swd_train} | Val SWD {swd_val}")
+
+            # Append the sliced Wasserstein distances to the history lists
+            self.train_history.append(swd_train)
+            self.val_history.append(swd_val)
+
+            #t3 = time.time()
             
             # Check early stopping criterion
             if self.early_stopping:
@@ -242,6 +269,10 @@ class Flow:
                                            n_knots=self.n_knots)
             pst.fit(y_train)
             self.transforms.append(pst)
+
+            #t4 = time.time()
+
+            #print(f"Time: {t1-t0:.2f} | {t2-t1:.2f} | {t3-t2:.2f} | {t4-t3:.2f}")
             
 
     def forward(self, x):
