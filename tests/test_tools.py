@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from sinflow.tools import (make_strictly_monotonic, 
-                           sliced_wasserstein_distance,
+                           #sliced_wasserstein_distance,
                            max_sliced_wasserstein_distance,) 
                            #gradient_max_sliced_wasserstein_distance, 
                            #optimize_direction)
