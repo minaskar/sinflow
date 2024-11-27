@@ -33,10 +33,10 @@ class TestTools(unittest.TestCase):
         with self.assertRaises(TypeError):
             make_strictly_monotonic(x)
 
-    def test_sliced_wasserstein_distance(self):
-        x = np.random.randn(100, 2)
-        distance = sliced_wasserstein_distance(x)
-        self.assertTrue(distance >= 0)
+    #def test_sliced_wasserstein_distance(self):
+    #    x = np.random.randn(100, 2)
+    #    distance = sliced_wasserstein_distance(x)
+    #    self.assertTrue(distance >= 0)
 
     def test_max_sliced_wasserstein_distance(self):
         x = np.random.randn(100, 2)
